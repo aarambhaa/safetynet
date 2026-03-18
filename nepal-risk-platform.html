@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentinel — Nepal Field Risk Intelligence Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #080B0F;
+  --bg2:      #0D1117;
+  --bg3:      #121820;
+  --surface:  #161C26;
+  --surface2: #1C2432;
+  --border:   rgba(255,255,255,0.06);
+  --border2:  rgba(255,255,255,0.11);
+  --border3:  rgba(255,255,255,0.18);
+  --text:     #E2E8F0;
+  --muted:    #64748B;
+  --muted2:   #94A3B8;
+  --cyan:     #22D3EE;
+  --cyan-dim: rgba(34,211,238,0.12);
+  --cyan-glow:rgba(34,211,238,0.25);
+  --amber:    #F59E0B;
+  --amber-dim:rgba(245,158,11,0.12);
+  --red:      #EF4444;
+  --red-dim:  rgba(239,68,68,0.12);
+  --green:    #10B981;
+  --green-dim:rgba(16,185,129,0.12);
+  --blue:     #3B82F6;
+  --blue-dim: rgba(59,130,246,0.1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border3); border-radius: 2px; }
+
+/* ─── NAV ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2.5rem;
+  height: 60px;
+  background: rgba(8,11,15,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-left { display: flex; align-items: center; gap: 2.5rem; }
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem; font-weight: 700;
+  color: var(--text); text-decoration: none;
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-icon {
+  width: 28px; height: 28px;
+  border: 1px solid var(--cyan);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.logo-icon::before {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  background: var(--cyan);
+  border-radius: 50%;
+  opacity: 0.9;
+  animation: pulse-logo 2s ease-in-out infinite;
+}
+@keyframes pulse-logo {
+  0%,100% { transform: scale(0.8); opacity: 0.9; }
+  50% { transform: scale(1.1); opacity: 0.5; }
+}
+.nav-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 3px 8px;
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(16,185,129,0.25);
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+  animation: blink-badge 3s infinite;
+}
+@keyframes blink-badge {
+  0%,90%,100% { opacity: 1; }
+  95% { opacity: 0.3; }
+}
+.nav-links { display: flex; gap: 2rem; }
+.nav-links a {
+  font-size: 12px; letter-spacing: 0.05em;
+  color: var(--muted); text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-right { display: flex; gap: 1rem; align-items: center; }
+.nav-btn {
+  font-size: 11px; letter-spacing: 0.08em;
+  padding: 7px 18px; border-radius: 4px;
+  text-decoration: none; font-family: 'Inter', sans-serif;
+  transition: all 0.2s; cursor: pointer; border: none;
+  font-weight: 400;
+}
+.nav-btn-ghost {
+  color: var(--muted2); background: transparent;
+  border: 1px solid var(--border2);
+}
+.nav-btn-ghost:hover { border-color: var(--border3); color: var(--text); }
+.nav-btn-primary {
+  color: var(--bg); background: var(--cyan);
+  font-weight: 500;
+}
+.nav-btn-primary:hover { background: #67E8F9; }
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  justify-content: center;
+  padding: 8rem 2.5rem 5rem;
+  position: relative; overflow: hidden;
+}
+.hero-grid-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(34,211,238,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34,211,238,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent);
+}
+.hero-glow {
+  position: absolute; top: 20%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse, rgba(34,211,238,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-inner {
+  max-width: 1100px; margin: 0 auto; width: 100%;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+}
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 0.15em;
+  color: var(--cyan); margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 10px;
+}
+.hero-eyebrow::before {
+  content: ''; display: block; width: 30px; height: 1px; background: var(--cyan);
+}
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.4rem, 4.5vw, 3.8rem);
+  font-weight: 700; line-height: 1.08;
+  margin-bottom: 1.5rem; color: var(--text);
+  letter-spacing: -0.02em;
+}
+.hero-title .accent { color: var(--cyan); }
+.hero-title .dim { color: var(--muted); }
+.hero-sub {
+  font-size: 15px; line-height: 1.8; color: var(--muted2);
+  margin-bottom: 2.5rem; max-width: 480px;
+}
+.hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--cyan); color: var(--bg);
+  padding: 12px 28px; border-radius: 4px;
+  font-size: 13px; font-weight: 500; letter-spacing: 0.04em;
+  text-decoration: none; border: none; cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-primary:hover { background: #67E8F9; transform: translateY(-1px); }
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; color: var(--muted2);
+  padding: 12px 24px; border-radius: 4px;
+  font-size: 13px; letter-spacing: 0.04em;
+  border: 1px solid var(--border2); text-decoration: none;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-outline:hover { border-color: var(--border3); color: var(--text); }
+.hero-stats {
+  display: flex; gap: 2rem; margin-top: 3rem;
+  padding-top: 2rem; border-top: 1px solid var(--border);
+}
+.hero-stat-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.6rem; color: var(--text); line-height: 1;
+}
+.hero-stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; letter-spacing: 0.05em; }
+
+/* Live dashboard preview */
+.hero-preview {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+.preview-titlebar {
+  background: var(--bg3);
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.titlebar-dots { display: flex; gap: 6px; }
+.titlebar-dot { width: 10px; height: 10px; border-radius: 50%; }
+.preview-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--muted); margin-left: 4px;
+}
+.preview-body { padding: 1.25rem; }
+.preview-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.preview-card {
+  flex: 1; background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px; padding: 10px 12px;
+}
+.preview-card-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 4px;
+}
+.preview-card-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem; font-weight: 500;
+}
+.val-green { color: var(--green); }
+.val-amber { color: var(--amber); }
+.val-red { color: var(--red); }
+.val-cyan { color: var(--cyan); }
+.preview-map {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 6px; height: 130px; position: relative; overflow: hidden;
+  margin-bottom: 10px;
+}
+.map-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(34,211,238,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34,211,238,0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.map-route {
+  position: absolute; inset: 0;
+}
+.map-label {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; color: var(--muted);
+}
+.map-dot {
+  position: absolute;
+  width: 8px; height: 8px; border-radius: 50%;
+  transform: translate(-50%,-50%);
+}
+.map-dot::after {
+  content: ''; position: absolute; inset: -4px;
+  border-radius: 50%; border: 1px solid currentColor; opacity: 0.3;
+  animation: ripple 2s infinite;
+}
+@keyframes ripple {
+  0% { transform: scale(1); opacity: 0.3; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+.preview-alerts { display: flex; flex-direction: column; gap: 6px; }
+.preview-alert {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 4px; padding: 8px 10px;
+  border-left: 2px solid;
+}
+.alert-icon { font-size: 11px; }
+.alert-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted2); }
+.alert-time { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); margin-left: auto; }
+
+/* ─── TICKER ─── */
+.ticker {
+  background: var(--bg3); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  padding: 10px 0; overflow: hidden; white-space: nowrap;
+}
+.ticker-inner { display: inline-flex; animation: ticker 35s linear infinite; }
+.ticker-item {
+  display: inline-flex; align-items: center; gap: 2rem;
+  padding: 0 3rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--muted);
+}
+.ticker-item .tick-key { color: var(--muted2); }
+.ticker-item .tick-val-green { color: var(--green); }
+.ticker-item .tick-val-amber { color: var(--amber); }
+.ticker-item .tick-sep { color: var(--border3); }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ─── SECTIONS ─── */
+.section { padding: 6rem 2.5rem; }
+.section-inner { max-width: 1100px; margin: 0 auto; }
+.section-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 0.15em; color: var(--cyan);
+  margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-eyebrow::before {
+  content: '//'; color: var(--border3);
+}
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-weight: 700; letter-spacing: -0.02em;
+  color: var(--text); margin-bottom: 1rem;
+}
+.section-sub { font-size: 15px; color: var(--muted2); line-height: 1.7; max-width: 560px; }
+
+/* ─── FEATURES ─── */
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: 6px; overflow: hidden; margin-top: 4rem;
+}
+.feature-card {
+  background: var(--bg2); padding: 2.5rem 2rem;
+  transition: background 0.3s; position: relative; overflow: hidden;
+}
+.feature-card:hover { background: var(--surface); }
+.feature-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--card-color, var(--cyan));
+  opacity: 0; transition: opacity 0.3s;
+}
+.feature-card:hover::before { opacity: 1; }
+.feature-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--muted); margin-bottom: 1.5rem;
+}
+.feature-icon {
+  width: 40px; height: 40px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; margin-bottom: 1.25rem;
+  border: 1px solid var(--border2);
+}
+.feature-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem; font-weight: 600;
+  color: var(--text); margin-bottom: 0.6rem;
+}
+.feature-desc { font-size: 13px; line-height: 1.7; color: var(--muted2); }
+
+/* ─── LIVE DASHBOARD ─── */
+.dashboard-section { background: var(--bg2); }
+.dashboard-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 8px; overflow: hidden;
+  margin-top: 3rem;
+}
+.dash-topbar {
+  background: var(--bg3); padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.dash-topbar-left { display: flex; align-items: center; gap: 1.5rem; }
+.dash-app-title {
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
+  color: var(--text);
+}
+.status-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 3px 10px; border-radius: 3px;
+  display: flex; align-items: center; gap: 5px;
+}
+.status-live { background: var(--green-dim); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+  animation: blink 1.5s infinite;
+}
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+.dash-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--muted);
+}
+.dash-body {
+  display: grid; grid-template-columns: 280px 1fr 260px;
+  min-height: 480px;
+}
+.dash-sidebar {
+  border-right: 1px solid var(--border);
+  padding: 1.25rem;
+}
+.dash-sidebar-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.1em; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 1rem;
+}
+.group-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 12px; margin-bottom: 8px;
+  cursor: pointer; transition: border-color 0.2s;
+}
+.group-card.active { border-color: var(--cyan); }
+.group-card:hover { border-color: var(--border3); }
+.group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.group-name { font-size: 12px; font-weight: 500; color: var(--text); }
+.group-risk {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 2px 8px; border-radius: 3px;
+}
+.risk-low { background: var(--green-dim); color: var(--green); }
+.risk-med { background: var(--amber-dim); color: var(--amber); }
+.risk-high { background: var(--red-dim); color: var(--red); }
+.group-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); }
+.group-progress { height: 2px; background: var(--border); border-radius: 1px; margin-top: 8px; }
+.group-progress-fill { height: 100%; border-radius: 1px; background: var(--cyan); }
+
+.dash-main { padding: 1.25rem; position: relative; }
+.dash-main-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.1em; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 1rem;
+}
+.metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.25rem; }
+.metric-tile {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 12px;
+}
+.metric-tile-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.1em; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 4px;
+}
+.metric-tile-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.2rem; font-weight: 500;
+}
+.metric-tile-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* chart area */
+.chart-area {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 1rem; height: 180px;
+  position: relative; overflow: hidden;
+}
+.chart-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.1em; margin-bottom: 8px;
+}
+.chart-svg { width: 100%; height: 130px; }
+
+.dash-alerts-col {
+  border-left: 1px solid var(--border);
+  padding: 1.25rem;
+  display: flex; flex-direction: column;
+}
+.dash-alerts-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1rem;
+}
+.dash-alerts-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.1em; color: var(--muted);
+  text-transform: uppercase;
+}
+.alert-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 2px 8px; border-radius: 3px;
+  background: var(--amber-dim); color: var(--amber);
+}
+.alert-item {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 10px 12px; margin-bottom: 8px;
+  border-left: 2px solid;
+  transition: border-color 0.2s;
+}
+.alert-item:hover { border-color: var(--cyan); }
+.alert-item-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.alert-item-type {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+}
+.alert-item-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--muted);
+}
+.alert-item-msg { font-size: 12px; color: var(--text); line-height: 1.5; }
+.alert-item-loc { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+/* ─── CHATBOT SECTION ─── */
+.chat-section { background: var(--bg3); }
+.chat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+.chat-window {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 8px; overflow: hidden;
+}
+.chat-topbar {
+  background: var(--bg3); padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.chat-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--cyan-dim); border: 1px solid var(--cyan);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--cyan);
+}
+.chat-bot-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.chat-bot-status { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--green); }
+.chat-body { padding: 1.25rem; min-height: 320px; display: flex; flex-direction: column; gap: 1rem; }
+.chat-msg { display: flex; gap: 10px; }
+.chat-msg.user { flex-direction: row-reverse; }
+.msg-avatar {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 12px;
+  border: 1px solid var(--border2);
+}
+.msg-bot-avatar { background: var(--cyan-dim); border-color: var(--cyan); color: var(--cyan); }
+.msg-user-avatar { background: var(--surface2); color: var(--muted2); }
+.msg-bubble {
+  max-width: 80%; padding: 10px 14px; border-radius: 6px;
+  font-size: 13px; line-height: 1.6;
+}
+.msg-bot { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.msg-user { background: var(--cyan-dim); color: var(--text); border: 1px solid rgba(34,211,238,0.2); }
+.msg-data-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 4px; padding: 10px 12px; margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+}
+.msg-data-row { display: flex; justify-content: space-between; padding: 3px 0; color: var(--muted2); }
+.msg-data-row .d-key { color: var(--muted); }
+.msg-data-row .d-val-green { color: var(--green); }
+.msg-data-row .d-val-amber { color: var(--amber); }
+.msg-data-row .d-val-red { color: var(--red); }
+.chat-input-row {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px;
+}
+.chat-input {
+  flex: 1; background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 4px; padding: 9px 14px;
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px;
+  outline: none; transition: border-color 0.2s;
+}
+.chat-input:focus { border-color: var(--cyan); }
+.chat-send {
+  background: var(--cyan); color: var(--bg); border: none;
+  border-radius: 4px; padding: 9px 16px; cursor: pointer;
+  font-size: 13px; font-weight: 500; transition: background 0.2s;
+}
+.chat-send:hover { background: #67E8F9; }
+.typing-indicator { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.typing-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--muted);
+  animation: typing 1.2s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+/* ─── PRICING ─── */
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden; margin-top: 4rem;
+}
+.pricing-card {
+  background: var(--bg2); padding: 2.5rem 2rem;
+  position: relative;
+}
+.pricing-card.featured {
+  background: var(--surface);
+  border: 2px solid var(--cyan);
+  margin: -1px;
+}
+.featured-badge {
+  position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
+  background: var(--cyan); color: var(--bg);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 3px 16px; border-radius: 0 0 4px 4px;
+  font-weight: 500; letter-spacing: 0.05em;
+}
+.pricing-plan {
+  font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted2); margin-bottom: 1rem;
+}
+.pricing-price {
+  font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 700;
+  color: var(--text); line-height: 1; margin-bottom: 0.25rem;
+}
+.pricing-price span { font-size: 1rem; color: var(--muted); font-weight: 400; }
+.pricing-desc { font-size: 13px; color: var(--muted2); margin-bottom: 2rem; line-height: 1.6; }
+.pricing-divider { height: 1px; background: var(--border); margin-bottom: 1.5rem; }
+.pricing-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 2rem; }
+.pricing-feature {
+  display: flex; gap: 10px; font-size: 13px; color: var(--muted2);
+  align-items: flex-start;
+}
+.feat-check { color: var(--cyan); font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+.feat-cross { color: var(--border3); font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+.pricing-btn {
+  display: block; text-align: center; padding: 11px;
+  border-radius: 4px; font-size: 13px; font-weight: 500;
+  text-decoration: none; cursor: pointer; border: none; width: 100%;
+  transition: all 0.2s; letter-spacing: 0.04em;
+}
+.pricing-btn-outline {
+  background: transparent; color: var(--muted2);
+  border: 1px solid var(--border2);
+}
+.pricing-btn-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+.pricing-btn-primary {
+  background: var(--cyan); color: var(--bg);
+}
+.pricing-btn-primary:hover { background: #67E8F9; }
+
+/* ─── API SECTION ─── */
+.api-section { background: var(--bg2); }
+.api-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; margin-top: 4rem; }
+.code-block {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 8px; overflow: hidden;
+}
+.code-topbar {
+  background: var(--surface); padding: 10px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.code-tabs { display: flex; gap: 0; }
+.code-tab {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; padding: 4px 14px; cursor: pointer;
+  color: var(--muted); border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.code-tab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+.code-copy {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--muted); cursor: pointer;
+  padding: 3px 10px; border: 1px solid var(--border);
+  border-radius: 3px; background: none; transition: all 0.2s;
+}
+.code-copy:hover { color: var(--text); border-color: var(--border3); }
+.code-body {
+  padding: 1.25rem; overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8;
+}
+.c-comment { color: #4A5568; }
+.c-keyword { color: #67E8F9; }
+.c-string { color: #86EFAC; }
+.c-key { color: #C4B5FD; }
+.c-num { color: #FCD34D; }
+.c-punct { color: var(--muted2); }
+
+.api-endpoints { display: flex; flex-direction: column; gap: 1rem; }
+.endpoint-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; padding: 1.25rem;
+  transition: border-color 0.2s; cursor: default;
+}
+.endpoint-card:hover { border-color: var(--border3); }
+.endpoint-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.method-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 2px 8px; border-radius: 3px;
+  font-weight: 500;
+}
+.method-get { background: var(--green-dim); color: var(--green); }
+.method-post { background: var(--blue-dim); color: var(--blue); }
+.endpoint-path { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cyan); }
+.endpoint-desc { font-size: 12px; color: var(--muted2); }
+
+/* ─── CUSTOMERS ─── */
+.customers-row {
+  display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;
+  margin-top: 3rem; padding-top: 3rem; border-top: 1px solid var(--border);
+}
+.customer-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--muted);
+  padding: 8px 18px; border: 1px solid var(--border);
+  border-radius: 4px; letter-spacing: 0.05em;
+  transition: border-color 0.2s, color 0.2s;
+}
+.customer-tag:hover { border-color: var(--border3); color: var(--muted2); }
+
+/* ─── CTA ─── */
+.cta-section {
+  background: var(--bg); text-align: center; padding: 7rem 2.5rem;
+  position: relative; overflow: hidden;
+}
+.cta-glow {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 500px; height: 300px;
+  background: radial-gradient(ellipse, rgba(34,211,238,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-inner { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
+.cta-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700; letter-spacing: -0.02em;
+  color: var(--text); margin-bottom: 1rem;
+}
+.cta-title .accent { color: var(--cyan); }
+.cta-sub { font-size: 15px; color: var(--muted2); line-height: 1.7; margin-bottom: 2.5rem; }
+.cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+/* ─── FOOTER ─── */
+footer {
+  background: var(--bg2); padding: 4rem 2.5rem 2.5rem;
+  border-top: 1px solid var(--border);
+}
+.footer-inner { max-width: 1100px; margin: 0 auto; }
+.footer-grid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 3rem; margin-bottom: 3rem; padding-bottom: 3rem;
+  border-bottom: 1px solid var(--border);
+}
+.footer-logo { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px; }
+.footer-tagline { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 240px; }
+.footer-col-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--cyan); margin-bottom: 1.25rem;
+}
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+.footer-col ul li a {
+  font-size: 13px; color: var(--muted); text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-col ul li a:hover { color: var(--muted2); }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+.footer-copy { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
+
+/* ─── FADE IN ─── */
+.fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.6s, transform 0.6s; }
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 8px; width: 90%; max-width: 480px;
+  padding: 2.5rem; position: relative;
+  transform: translateY(20px); transition: transform 0.3s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-close {
+  position: absolute; top: 1rem; right: 1rem;
+  background: none; border: none; color: var(--muted);
+  font-size: 18px; cursor: pointer; line-height: 1;
+}
+.modal-title { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
+.modal-sub { font-size: 13px; color: var(--muted2); margin-bottom: 2rem; }
+.modal-form { display: flex; flex-direction: column; gap: 1rem; }
+.form-field label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.form-field input, .form-field select {
+  width: 100%; background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 4px; padding: 10px 14px; color: var(--text);
+  font-family: 'Inter', sans-serif; font-size: 13px; outline: none;
+  transition: border-color 0.2s;
+}
+.form-field input:focus, .form-field select:focus { border-color: var(--cyan); }
+.form-field select option { background: var(--bg2); }
+.modal-submit {
+  background: var(--cyan); color: var(--bg); border: none;
+  border-radius: 4px; padding: 12px; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: background 0.2s; width: 100%;
+  font-family: 'Inter', sans-serif; margin-top: 0.5rem;
+}
+.modal-submit:hover { background: #67E8F9; }
+.modal-success { text-align: center; padding: 1rem 0; display: none; }
+.modal-success-icon { font-size: 2rem; margin-bottom: 1rem; }
+.modal-success h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; color: var(--text); margin-bottom: 0.5rem; }
+.modal-success p { font-size: 13px; color: var(--muted2); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1000px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .hero-preview { display: none; }
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .dash-body { grid-template-columns: 1fr; }
+  .dash-sidebar, .dash-alerts-col { display: none; }
+  .chat-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .api-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+}
+@media (max-width: 640px) {
+  nav { padding: 0 1.25rem; }
+  .nav-links { display: none; }
+  .section { padding: 4rem 1.25rem; }
+  .features-grid { grid-template-columns: 1fr; }
+  .metrics-row { grid-template-columns: 1fr 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <a href="#" class="nav-logo">
+      <div class="logo-icon"></div>
+      Sentinel
+    </a>
+    <div class="nav-badge"><span class="live-dot"></span> LIVE</div>
+  </div>
+  <div class="nav-links">
+    <a href="#platform">Platform</a>
+    <a href="#chatbot">AI Assistant</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#api">API</a>
+    <a href="#docs">Docs</a>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn nav-btn-ghost" onclick="openModal()">Request access</button>
+    <button class="nav-btn nav-btn-primary" onclick="openModal()">Start free trial</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow">Field risk intelligence · Nepal</div>
+      <h1 class="hero-title">
+        Know before<br>
+        your team<br>
+        <span class="accent">steps outside.</span>
+      </h1>
+      <p class="hero-sub">Real-time operational risk monitoring for field teams, educational programs, and expedition operators in Nepal. Weather, seismic, road, and political risk — unified into one decision layer.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="openModal()">Start free trial →</button>
+        <a href="#platform" class="btn-outline">See the platform</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-num">14</div>
+          <div class="hero-stat-label">Data sources</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">&lt;90s</div>
+          <div class="hero-stat-label">Alert latency</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">75+</div>
+          <div class="hero-stat-label">Districts covered</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">24/7</div>
+          <div class="hero-stat-label">Monitoring</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-preview">
+      <div class="preview-titlebar">
+        <div class="titlebar-dots">
+          <div class="titlebar-dot" style="background:#3A3A3A"></div>
+          <div class="titlebar-dot" style="background:#3A3A3A"></div>
+          <div class="titlebar-dot" style="background:#3A3A3A"></div>
+        </div>
+        <div class="preview-title">sentinel.dashboard — Langtang Group · Live</div>
+      </div>
+      <div class="preview-body">
+        <div class="preview-row">
+          <div class="preview-card">
+            <div class="preview-card-label">Seismic</div>
+            <div class="preview-card-val val-green">M 1.2</div>
+          </div>
+          <div class="preview-card">
+            <div class="preview-card-label">Weather</div>
+            <div class="preview-card-val val-amber">MOD</div>
+          </div>
+          <div class="preview-card">
+            <div class="preview-card-label">Road</div>
+            <div class="preview-card-val val-green">CLEAR</div>
+          </div>
+          <div class="preview-card">
+            <div class="preview-card-label">Risk Score</div>
+            <div class="preview-card-val val-cyan">34</div>
+          </div>
+        </div>
+        <div class="preview-map">
+          <div class="map-grid"></div>
+          <svg class="map-route" viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <polyline points="60,100 120,80 180,60 240,70 300,45 340,55" fill="none" stroke="rgba(34,211,238,0.3)" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <circle cx="60" cy="100" r="4" fill="#22D3EE" opacity="0.8"/>
+            <circle cx="340" cy="55" r="4" fill="#22D3EE" opacity="0.8"/>
+            <circle cx="220" cy="65" r="5" fill="#F59E0B"/>
+          </svg>
+          <div class="map-label" style="left:8px;bottom:8px;color:rgba(34,211,238,0.5)">KTM</div>
+          <div class="map-label" style="right:8px;top:8px;color:rgba(34,211,238,0.5)">LANGTANG</div>
+          <div class="map-dot" style="left:55%;top:50%;background:var(--amber);color:var(--amber)"></div>
+        </div>
+        <div class="preview-alerts">
+          <div class="preview-alert" style="border-left-color:var(--amber)">
+            <div class="alert-icon" style="color:var(--amber)">⚠</div>
+            <div class="alert-text">Moderate snowfall forecast · 3,800m+ · 14:00–18:00</div>
+            <div class="alert-time">12m ago</div>
+          </div>
+          <div class="preview-alert" style="border-left-color:var(--green)">
+            <div class="alert-icon" style="color:var(--green)">✓</div>
+            <div class="alert-text">Langtang trail checkpoint — all clear</div>
+            <div class="alert-time">1h ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ticker-item"><span class="tick-key">KATHMANDU</span> <span class="tick-sep">·</span> <span class="tick-val-green">RISK: LOW · 18°C · CLEAR</span></span>
+    <span class="ticker-item"><span class="tick-key">POKHARA</span> <span class="tick-sep">·</span> <span class="tick-val-green">RISK: LOW · 21°C · PARTLY CLOUDY</span></span>
+    <span class="ticker-item"><span class="tick-key">LANGTANG</span> <span class="tick-sep">·</span> <span class="tick-val-amber">RISK: MOD · -2°C · SNOW FORECAST</span></span>
+    <span class="ticker-item"><span class="tick-key">EVEREST REGION</span> <span class="tick-sep">·</span> <span class="tick-val-green">RISK: LOW · -8°C · STABLE</span></span>
+    <span class="ticker-item"><span class="tick-key">CHITWAN</span> <span class="tick-sep">·</span> <span class="tick-val-green">RISK: LOW · 28°C · CLEAR</span></span>
+    <span class="ticker-item"><span class="tick-key">MUSTANG</span> <span class="tick-sep">·</span> <span class="tick-val-amber">RISK: MOD · HIGH WIND ADVISORY</span></span>
+    <span class="ticker-item"><span class="tick-key">SEISMIC</span> <span class="tick-sep">·</span> <span class="tick-val-green">LAST 24H: M1.2 · NORMAL ACTIVITY</span></span>
+    <span class="ticker-item"><span class="tick-key">KATHMANDU</span> <span class="tick-sep">·</span> <span class="tick-val-green">RISK: LOW · 18°C · CLEAR</span></span>
+    <span class="ticker-item"><span class="tick-key">POKHARA</span> <span class="tick-sep">·</span> <span class="tick-val-green">RISK: LOW · 21°C · PARTLY CLOUDY</span></span>
+    <span class="ticker-item"><span class="tick-key">LANGTANG</span> <span class="tick-sep">·</span> <span class="tick-val-amber">RISK: MOD · -2°C · SNOW FORECAST</span></span>
+    <span class="ticker-item"><span class="tick-key">EVEREST REGION</span> <span class="tick-sep">·</span> <span class="tick-val-green">RISK: LOW · -8°C · STABLE</span></span>
+    <span class="ticker-item"><span class="tick-key">MUSTANG</span> <span class="tick-sep">·</span> <span class="tick-val-amber">RISK: MOD · HIGH WIND ADVISORY</span></span>
+    <span class="ticker-item"><span class="tick-key">SEISMIC</span> <span class="tick-sep">·</span> <span class="tick-val-green">LAST 24H: M1.2 · NORMAL ACTIVITY</span></span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section fade-up" id="platform">
+  <div class="section-inner">
+    <div class="section-eyebrow">Platform capabilities</div>
+    <h2 class="section-title">Every risk signal, one platform.</h2>
+    <p class="section-sub">Built from the ground up for Nepal's unique risk landscape — combining government data feeds, satellite inputs, and ground truth from field operators.</p>
+    <div class="features-grid">
+      <div class="feature-card" style="--card-color: var(--cyan)">
+        <div class="feature-num">01 //</div>
+        <div class="feature-icon">🌩</div>
+        <div class="feature-name">Weather Intelligence</div>
+        <p class="feature-desc">Hyperlocal forecasting from DHM Nepal, integrating satellite data for altitude-specific weather windows. Snowfall, wind, visibility, and precipitation alerts per route segment.</p>
+      </div>
+      <div class="feature-card" style="--card-color: var(--amber)">
+        <div class="feature-num">02 //</div>
+        <div class="feature-icon">⚡</div>
+        <div class="feature-name">Seismic Monitoring</div>
+        <p class="feature-desc">Real-time earthquake data from USGS and NSC Nepal. Magnitude thresholds, aftershock probability windows, and automated alerts to field coordinators within 90 seconds.</p>
+      </div>
+      <div class="feature-card" style="--card-color: var(--green)">
+        <div class="feature-num">03 //</div>
+        <div class="feature-icon">🛣</div>
+        <div class="feature-name">Route & Road Status</div>
+        <p class="feature-desc">Landslide risk overlays, road blockage reports, and trail condition feeds crowdsourced from partner operators and government authorities across all major trekking corridors.</p>
+      </div>
+      <div class="feature-card" style="--card-color: var(--blue)">
+        <div class="feature-num">04 //</div>
+        <div class="feature-icon">📊</div>
+        <div class="feature-name">Composite Risk Scoring</div>
+        <p class="feature-desc">A probabilistic risk score (0–100) computed across all active signals for each location and group. Updated every 15 minutes. Fully auditable with factor breakdowns.</p>
+      </div>
+      <div class="feature-card" style="--card-color: var(--red)">
+        <div class="feature-num">05 //</div>
+        <div class="feature-icon">🚨</div>
+        <div class="feature-name">Alert Engine</div>
+        <p class="feature-desc">Configurable thresholds trigger SMS, email, and in-app alerts to field coordinators. Escalation trees, on-call schedules, and two-way acknowledgement built in.</p>
+      </div>
+      <div class="feature-card" style="--card-color: var(--amber)">
+        <div class="feature-num">06 //</div>
+        <div class="feature-icon">🤖</div>
+        <div class="feature-name">AI Field Assistant</div>
+        <p class="feature-desc">Ask plain-language questions about any route, group, or condition. The AI synthesises live data into actionable recommendations — no dashboard expertise required.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DASHBOARD -->
+<section class="section dashboard-section fade-up">
+  <div class="section-inner">
+    <div class="section-eyebrow">Live platform</div>
+    <h2 class="section-title">The operator's view.</h2>
+    <p class="section-sub">A unified operations centre for all your active groups — from Kathmandu-based coordinators to satellite-connected field leads.</p>
+    <div class="dashboard-wrap">
+      <div class="dash-topbar">
+        <div class="dash-topbar-left">
+          <div class="dash-app-title">Sentinel Operations</div>
+          <div class="status-pill status-live"><div class="live-dot"></div> Live — 3 active groups</div>
+        </div>
+        <div class="dash-time" id="live-time">--:--:-- UTC</div>
+      </div>
+      <div class="dash-body">
+        <div class="dash-sidebar">
+          <div class="dash-sidebar-title">Active groups</div>
+          <div class="group-card active">
+            <div class="group-header">
+              <div class="group-name">Langtang Cohort A</div>
+              <div class="group-risk risk-med">MOD</div>
+            </div>
+            <div class="group-meta">12 members · Day 4 of 14</div>
+            <div class="group-meta" style="margin-top:3px">📍 Langtang Village · 3,430m</div>
+            <div class="group-progress"><div class="group-progress-fill" style="width:28%"></div></div>
+          </div>
+          <div class="group-card">
+            <div class="group-header">
+              <div class="group-name">EBC Trek — Group 7</div>
+              <div class="group-risk risk-low">LOW</div>
+            </div>
+            <div class="group-meta">8 members · Day 9 of 16</div>
+            <div class="group-meta" style="margin-top:3px">📍 Namche Bazaar · 3,440m</div>
+            <div class="group-progress"><div class="group-progress-fill" style="width:56%"></div></div>
+          </div>
+          <div class="group-card">
+            <div class="group-header">
+              <div class="group-name">DRR Field Study</div>
+              <div class="group-risk risk-low">LOW</div>
+            </div>
+            <div class="group-meta">15 members · Day 2 of 10</div>
+            <div class="group-meta" style="margin-top:3px">📍 Sindhupalchok · 1,200m</div>
+            <div class="group-progress"><div class="group-progress-fill" style="width:20%"></div></div>
+          </div>
+        </div>
+        <div class="dash-main">
+          <div class="dash-main-title">Langtang Cohort A — Risk overview</div>
+          <div class="metrics-row">
+            <div class="metric-tile">
+              <div class="metric-tile-label">Risk score</div>
+              <div class="metric-tile-val val-amber" id="risk-score">34</div>
+              <div class="metric-tile-sub">Moderate</div>
+            </div>
+            <div class="metric-tile">
+              <div class="metric-tile-label">Temperature</div>
+              <div class="metric-tile-val val-cyan">-2°C</div>
+              <div class="metric-tile-sub">At altitude</div>
+            </div>
+            <div class="metric-tile">
+              <div class="metric-tile-label">Seismic</div>
+              <div class="metric-tile-val val-green">M 1.2</div>
+              <div class="metric-tile-sub">Normal range</div>
+            </div>
+            <div class="metric-tile">
+              <div class="metric-tile-label">Trail status</div>
+              <div class="metric-tile-val val-green">Clear</div>
+              <div class="metric-tile-sub">All segments</div>
+            </div>
+          </div>
+          <div class="chart-area">
+            <div class="chart-label">Risk score — last 12 hours</div>
+            <svg class="chart-svg" viewBox="0 0 500 110" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#22D3EE" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#22D3EE" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- Grid lines -->
+              <line x1="0" y1="20" x2="500" y2="20" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="0" y1="50" x2="500" y2="50" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="0" y1="80" x2="500" y2="80" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <!-- Threshold line -->
+              <line x1="0" y1="35" x2="500" y2="35" stroke="rgba(245,158,11,0.3)" stroke-width="1" stroke-dasharray="4,3"/>
+              <!-- Area fill -->
+              <path d="M0,85 L45,80 L90,75 L135,70 L180,78 L225,65 L270,55 L315,48 L360,40 L405,38 L450,35 L500,34 L500,110 L0,110 Z" fill="url(#chartFill)"/>
+              <!-- Line -->
+              <polyline points="0,85 45,80 90,75 135,70 180,78 225,65 270,55 315,48 360,40 405,38 450,35 500,34" fill="none" stroke="#22D3EE" stroke-width="1.5" opacity="0.8"/>
+              <!-- Current point -->
+              <circle cx="500" cy="34" r="3" fill="#22D3EE"/>
+              <!-- x-axis labels -->
+              <text x="0" y="108" fill="#4A5568" font-family="JetBrains Mono" font-size="9">00:00</text>
+              <text x="100" y="108" fill="#4A5568" font-family="JetBrains Mono" font-size="9">02:00</text>
+              <text x="220" y="108" fill="#4A5568" font-family="JetBrains Mono" font-size="9">05:00</text>
+              <text x="340" y="108" fill="#4A5568" font-family="JetBrains Mono" font-size="9">09:00</text>
+              <text x="460" y="108" fill="#4A5568" font-family="JetBrains Mono" font-size="9">Now</text>
+              <!-- y-axis -->
+              <text x="0" y="22" fill="#4A5568" font-family="JetBrains Mono" font-size="9">80</text>
+              <text x="0" y="52" fill="#4A5568" font-family="JetBrains Mono" font-size="9">50</text>
+              <text x="0" y="82" fill="#4A5568" font-family="JetBrains Mono" font-size="9">20</text>
+            </svg>
+          </div>
+        </div>
+        <div class="dash-alerts-col">
+          <div class="dash-alerts-header">
+            <div class="dash-alerts-title">Active alerts</div>
+            <div class="alert-count">2 active</div>
+          </div>
+          <div class="alert-item" style="border-left-color: var(--amber)">
+            <div class="alert-item-header">
+              <div class="alert-item-type" style="color:var(--amber)">WEATHER</div>
+              <div class="alert-item-time">12m ago</div>
+            </div>
+            <div class="alert-item-msg">Moderate snowfall expected 3,800m+ between 14:00–18:00 local.</div>
+            <div class="alert-item-loc">📍 Langtang Valley</div>
+          </div>
+          <div class="alert-item" style="border-left-color: var(--blue)">
+            <div class="alert-item-header">
+              <div class="alert-item-type" style="color:var(--blue)">ADVISORY</div>
+              <div class="alert-item-time">2h ago</div>
+            </div>
+            <div class="alert-item-msg">Trail maintenance scheduled on Langtang–Kyanjin segment tomorrow 07:00–10:00.</div>
+            <div class="alert-item-loc">📍 Segment KJ-04</div>
+          </div>
+          <div class="alert-item" style="border-left-color: var(--green)">
+            <div class="alert-item-header">
+              <div class="alert-item-type" style="color:var(--green)">RESOLVED</div>
+              <div class="alert-item-time">5h ago</div>
+            </div>
+            <div class="alert-item-msg">Wind advisory cleared. Conditions nominal above 4,000m.</div>
+            <div class="alert-item-loc">📍 Kyanjin Gompa</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHATBOT -->
+<section class="section chat-section fade-up" id="chatbot">
+  <div class="section-inner">
+    <div class="chat-grid">
+      <div>
+        <div class="section-eyebrow">AI field assistant</div>
+        <h2 class="section-title">Ask. Don't navigate dashboards.</h2>
+        <p class="section-sub" style="margin-bottom:2rem">Field coordinators shouldn't need to become data analysts. Ask Sentinel anything about your route, group, or conditions — and get a direct, data-backed answer.</p>
+        <div style="display:flex;flex-direction:column;gap:1rem">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1rem 1.25rem">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:4px">EXAMPLE QUERIES</div>
+            <div style="font-size:13px;color:var(--muted2);line-height:2">
+              "Is the Langtang route safe tomorrow morning?"<br>
+              "What's the seismic risk in Sindhupalchok today?"<br>
+              "Should we delay departure given the forecast?"<br>
+              "Compare risk levels: Annapurna vs Langtang this week"
+            </div>
+          </div>
+          <div style="background:var(--green-dim);border:1px solid rgba(16,185,129,0.2);border-radius:6px;padding:1rem 1.25rem">
+            <div style="font-size:13px;color:var(--green)">Powered by live Sentinel data — not generic AI</div>
+            <div style="font-size:12px;color:rgba(16,185,129,0.7);margin-top:3px">Every answer cites the data sources and timestamps used.</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-window">
+        <div class="chat-topbar">
+          <div class="chat-avatar">S</div>
+          <div>
+            <div class="chat-bot-name">Sentinel AI</div>
+            <div class="chat-bot-status">● Online · Live data</div>
+          </div>
+        </div>
+        <div class="chat-body" id="chat-body">
+          <div class="chat-msg">
+            <div class="msg-avatar msg-bot-avatar">S</div>
+            <div class="msg-bubble msg-bot">
+              Hello. I have live access to weather, seismic, road, and operational data across Nepal. What do you need to know about your route or group today?
+            </div>
+          </div>
+          <div class="chat-msg user">
+            <div class="msg-avatar msg-user-avatar">U</div>
+            <div class="msg-bubble msg-user">Is the Langtang route safe for departure tomorrow morning?</div>
+          </div>
+          <div class="chat-msg">
+            <div class="msg-avatar msg-bot-avatar">S</div>
+            <div class="msg-bubble msg-bot">
+              Based on current data, tomorrow morning departure is <strong style="color:var(--amber)">cautiously advisable</strong> with one condition to monitor.
+              <div class="msg-data-block">
+                <div class="msg-data-row"><span class="d-key">Weather 06:00–12:00</span><span class="d-val-green">Clear · -1°C</span></div>
+                <div class="msg-data-row"><span class="d-key">Snowfall risk (aft.)</span><span class="d-val-amber">Moderate · 3,800m+</span></div>
+                <div class="msg-data-row"><span class="d-key">Seismic (24h)</span><span class="d-val-green">M1.2 · Normal</span></div>
+                <div class="msg-data-row"><span class="d-key">Trail KJ-01 to KJ-04</span><span class="d-val-green">Clear</span></div>
+                <div class="msg-data-row"><span class="d-key">Composite risk score</span><span class="d-val-amber">34 / 100 · Moderate</span></div>
+              </div>
+              Recommendation: depart by 07:00 and reach Langtang Village before 13:00 to avoid afternoon snowfall window. Monitor the 12:00 forecast update before proceeding to Kyanjin.
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" class="chat-input" id="chat-input" placeholder="Ask about any route, risk, or condition..." />
+          <button class="chat-send" id="chat-send">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section fade-up" id="pricing">
+  <div class="section-inner">
+    <div class="section-eyebrow">Pricing</div>
+    <h2 class="section-title">Simple, transparent plans.</h2>
+    <p class="section-sub">Start free. Scale as your operations grow. Annual billing available with 20% discount.</p>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-plan">Starter</div>
+        <div class="pricing-price">$0 <span>/ month</span></div>
+        <p class="pricing-desc">For independent operators and small teams validating the platform.</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li class="pricing-feature"><span class="feat-check">✓</span> Up to 2 active groups</li>
+          <li class="pricing-feature"><span class="feat-check">✓</span> Weather & seismic data</li>
+          <li class="pricing-feature"><span class="feat-check">✓</span> Basic alert engine (email)</li>
+          <li class="pricing-feature"><span class="feat-check">✓</span> 7-day data history</li>
+          <li class="pricing-feature"><span class="feat-cross">✗</span> <span style="color:var(--muted)">AI assistant</span></li>
+          <li class="pricing-feature"><span class="feat-cross">✗</span> <span style="color:var(--muted)">API access</span></li>
+        </ul>
+        <button class="pricing-btn pricing-btn-outline" onclick="openModal()">Get started free</button>
+      </div>
+      <div class="pricing-card featured">
+        <div class="featured-badge">MOST POPULAR</div>
+        <div class="pricing-plan">Operator</div>
+        <div class="pricing-price">$89 <span>/ month</span></div>
+        <p class="pricing-desc">For trekking companies, educational programs, and INGOs running regular field operations.</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li class="pricing-feature"><span class="feat-check">✓</span> Up to 15 active groups</li>
+          <li class="pricing-feature"><span class="feat-check">✓</span> All data sources incl. road & political</li>
+          <li class="pricing-feature"><span class="feat-check">✓</span> SMS + email + app alerts</li>
+          <li class="pricing-feature"><span class="feat-check">✓</span> AI field assistant (100 queries/mo)</li>
+          <li class="pricing-feature"><span class="feat-check">✓</span> 90-day data history & reports</li>
+          <li class="pricing-feature"><span class="feat-check">✓</span> API access (5k calls/mo)</li>
+        </ul>
+        <button class="pricing-btn pricing-btn-primary" onclick="openModal()">Start 14-day trial</button>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-plan">Enterprise</div>
+        <div class="pricing-price">Custom</div>
+        <p class="pricing-desc">For large expedition operators, embassies, universities, and insurance providers.</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li class="pricing-feature"><span class="feat-check">✓</span> Unlimited groups</li>
+          <li class="pricing-feature"><span class="feat-check">✓</span> Custom data integrations</li>
+          <li class="pricing-feature"><span class="feat-check">✓</span> Dedicated API with SLA</li>
+          <li class="pricing-feature"><span class="feat-check">✓</span> AI assistant (unlimited)</li>
+          <li class="pricing-feature"><span class="feat-check">✓</span> Custom alert rules & escalation</li>
+          <li class="pricing-feature"><span class="feat-check">✓</span> Onboarding & support</li>
+        </ul>
+        <button class="pricing-btn pricing-btn-outline" onclick="openModal()">Contact sales</button>
+      </div>
+    </div>
+    <div class="customers-row">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase">Trusted by</div>
+      <div class="customer-tag">Trekking Agencies</div>
+      <div class="customer-tag">Educational Programs</div>
+      <div class="customer-tag">INGOs & NGOs</div>
+      <div class="customer-tag">Expedition Companies</div>
+      <div class="customer-tag">Travel Insurers</div>
+      <div class="customer-tag">Embassies</div>
+    </div>
+  </div>
+</section>
+
+<!-- API -->
+<section class="section api-section fade-up" id="api">
+  <div class="section-inner">
+    <div class="section-eyebrow">Developer API</div>
+    <h2 class="section-title">Integrate risk data into your stack.</h2>
+    <p class="section-sub">A RESTful API with real-time and historical endpoints. Used by travel insurance systems, university ERPs, and expedition management software.</p>
+    <div class="api-grid">
+      <div class="code-block">
+        <div class="code-topbar">
+          <div class="code-tabs">
+            <div class="code-tab active" onclick="switchTab(this,'curl')">cURL</div>
+            <div class="code-tab" onclick="switchTab(this,'python')">Python</div>
+            <div class="code-tab" onclick="switchTab(this,'js')">JavaScript</div>
+          </div>
+          <button class="code-copy" onclick="this.textContent='Copied!'">Copy</button>
+        </div>
+        <div class="code-body" id="code-curl">
+<span class="c-comment"># Get composite risk score for a location</span>
+<br>curl -X GET <span class="c-string">\</span>
+<br>&nbsp;&nbsp;<span class="c-string">"https://api.sentinel.np/v1/risk/score"</span> <span class="c-string">\</span>
+<br>&nbsp;&nbsp;-H <span class="c-string">"Authorization: Bearer YOUR_API_KEY"</span> <span class="c-string">\</span>
+<br>&nbsp;&nbsp;-H <span class="c-string">"Content-Type: application/json"</span> <span class="c-string">\</span>
+<br>&nbsp;&nbsp;-d <span class="c-string">'{"lat": 28.2096, "lng": 85.4246,</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-string">"altitude_m": 3430}'</span>
+<br>
+<br><span class="c-comment"># Response</span>
+<br><span class="c-punct">{</span>
+<br>&nbsp;&nbsp;<span class="c-key">"location"</span><span class="c-punct">:</span> <span class="c-string">"Langtang Village"</span><span class="c-punct">,</span>
+<br>&nbsp;&nbsp;<span class="c-key">"risk_score"</span><span class="c-punct">:</span> <span class="c-num">34</span><span class="c-punct">,</span>
+<br>&nbsp;&nbsp;<span class="c-key">"risk_level"</span><span class="c-punct">:</span> <span class="c-string">"moderate"</span><span class="c-punct">,</span>
+<br>&nbsp;&nbsp;<span class="c-key">"factors"</span><span class="c-punct">: {</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-key">"weather"</span><span class="c-punct">:</span> <span class="c-num">42</span><span class="c-punct">,</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-key">"seismic"</span><span class="c-punct">:</span> <span class="c-num">8</span><span class="c-punct">,</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-key">"trail"</span><span class="c-punct">:</span> <span class="c-num">12</span>
+<br>&nbsp;&nbsp;<span class="c-punct">},</span>
+<br>&nbsp;&nbsp;<span class="c-key">"updated_at"</span><span class="c-punct">:</span> <span class="c-string">"2025-03-18T06:42:11Z"</span>
+<br><span class="c-punct">}</span>
+        </div>
+        <div class="code-body" id="code-python" style="display:none">
+<span class="c-keyword">import</span> requests
+<br>
+<br><span class="c-comment"># Initialize client</span>
+<br>session <span class="c-punct">=</span> requests.Session<span class="c-punct">()</span>
+<br>session.headers.update<span class="c-punct">({</span>
+<br>&nbsp;&nbsp;<span class="c-string">"Authorization"</span><span class="c-punct">:</span> <span class="c-string">f"Bearer {API_KEY}"</span>
+<br><span class="c-punct">})</span>
+<br>
+<br><span class="c-comment"># Get risk score</span>
+<br>response <span class="c-punct">=</span> session.get<span class="c-punct">(</span>
+<br>&nbsp;&nbsp;<span class="c-string">"https://api.sentinel.np/v1/risk/score"</span><span class="c-punct">,</span>
+<br>&nbsp;&nbsp;params<span class="c-punct">={</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-string">"lat"</span><span class="c-punct">:</span> <span class="c-num">28.2096</span><span class="c-punct">,</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-string">"lng"</span><span class="c-punct">:</span> <span class="c-num">85.4246</span><span class="c-punct">,</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-string">"altitude_m"</span><span class="c-punct">:</span> <span class="c-num">3430</span>
+<br>&nbsp;&nbsp;<span class="c-punct">}</span>
+<br><span class="c-punct">)</span>
+<br>data <span class="c-punct">=</span> response.json<span class="c-punct">()</span>
+<br><span class="c-keyword">print</span><span class="c-punct">(</span>data<span class="c-punct">[</span><span class="c-string">"risk_score"</span><span class="c-punct">])</span>  <span class="c-comment"># 34</span>
+        </div>
+        <div class="code-body" id="code-js" style="display:none">
+<span class="c-keyword">const</span> client <span class="c-punct">=</span> <span class="c-keyword">new</span> SentinelClient<span class="c-punct">({</span>
+<br>&nbsp;&nbsp;apiKey<span class="c-punct">:</span> process.env.<span class="c-string">SENTINEL_API_KEY</span>
+<br><span class="c-punct">});</span>
+<br>
+<br><span class="c-comment">// Get risk score</span>
+<br><span class="c-keyword">const</span> risk <span class="c-punct">=</span> <span class="c-keyword">await</span> client.risk.score<span class="c-punct">({</span>
+<br>&nbsp;&nbsp;lat<span class="c-punct">:</span> <span class="c-num">28.2096</span><span class="c-punct">,</span>
+<br>&nbsp;&nbsp;lng<span class="c-punct">:</span> <span class="c-num">85.4246</span><span class="c-punct">,</span>
+<br>&nbsp;&nbsp;altitudeM<span class="c-punct">:</span> <span class="c-num">3430</span>
+<br><span class="c-punct">});</span>
+<br>
+<br><span class="c-comment">// Subscribe to live alerts</span>
+<br>client.alerts.subscribe<span class="c-punct">(</span><span class="c-string">'group-langtang-a'</span><span class="c-punct">,</span>
+<br>&nbsp;&nbsp;<span class="c-punct">(</span>alert<span class="c-punct">) =></span> <span class="c-punct">{</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;console.log<span class="c-punct">(</span>alert.severity<span class="c-punct">,</span> alert.message<span class="c-punct">);</span>
+<br>&nbsp;&nbsp;<span class="c-punct">}</span>
+<br><span class="c-punct">);</span>
+        </div>
+      </div>
+      <div class="api-endpoints">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:1rem">Available endpoints</div>
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-get">GET</span>
+            <span class="endpoint-path">/v1/risk/score</span>
+          </div>
+          <div class="endpoint-desc">Composite risk score for any Nepal coordinate. Returns score, level, and factor breakdown.</div>
+        </div>
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-get">GET</span>
+            <span class="endpoint-path">/v1/weather/forecast</span>
+          </div>
+          <div class="endpoint-desc">Altitude-corrected 72-hour weather forecast. Precipitation, snowfall probability, visibility, wind.</div>
+        </div>
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-get">GET</span>
+            <span class="endpoint-path">/v1/seismic/events</span>
+          </div>
+          <div class="endpoint-desc">Real-time and historical earthquake events. Filter by magnitude, radius, and time window.</div>
+        </div>
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-get">GET</span>
+            <span class="endpoint-path">/v1/routes/status</span>
+          </div>
+          <div class="endpoint-desc">Trail and road status for all major trekking corridors. Blockages, maintenance, and risk overlays.</div>
+        </div>
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-post">POST</span>
+            <span class="endpoint-path">/v1/alerts/subscribe</span>
+          </div>
+          <div class="endpoint-desc">Subscribe a webhook or phone number to receive alerts for a specific group or location.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="cta-inner fade-up">
+    <div class="section-eyebrow" style="justify-content:center;display:flex;margin-bottom:1.5rem">Get started today</div>
+    <h2 class="cta-title">Your team deserves to know what's <span class="accent">coming.</span></h2>
+    <p class="cta-sub">Start with a free account. No credit card required. Full access to weather, seismic, and road data for up to 2 active groups.</p>
+    <div class="cta-actions">
+      <button class="btn-primary" onclick="openModal()">Start free trial →</button>
+      <a href="#api" class="btn-outline">Read API docs</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">
+          <div class="logo-icon" style="width:22px;height:22px"></div>
+          Sentinel
+        </div>
+        <p class="footer-tagline">Nepal field risk intelligence. Built by operators, for operators.</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Platform</div>
+        <ul>
+          <li><a href="#platform">Dashboard</a></li>
+          <li><a href="#chatbot">AI Assistant</a></li>
+          <li><a href="#api">API</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Data sources</div>
+        <ul>
+          <li><a href="#">DHM Nepal</a></li>
+          <li><a href="#">USGS Seismic</a></li>
+          <li><a href="#">NSC Nepal</a></li>
+          <li><a href="#">NDRRMA</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Company</div>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Status page</a></li>
+          <li><a href="mailto:api@sentinel.np">api@sentinel.np</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 Sentinel · Kathmandu, Nepal</div>
+      <div style="display:flex;gap:1.5rem">
+        <div class="footer-copy">Privacy</div>
+        <div class="footer-copy">Terms</div>
+        <div class="footer-copy">SLA</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modal-form-wrap">
+      <h3 class="modal-title">Start your free trial</h3>
+      <p class="modal-sub">No credit card required. Full access to Starter plan — upgrade anytime.</p>
+      <form class="modal-form" id="modal-form" onsubmit="handleModalSubmit(event)">
+        <div class="form-field">
+          <label>Full name</label>
+          <input type="text" placeholder="Alex Sherpa" required>
+        </div>
+        <div class="form-field">
+          <label>Work email</label>
+          <input type="email" placeholder="alex@himalayantreks.com" required>
+        </div>
+        <div class="form-field">
+          <label>Organisation type</label>
+          <select required>
+            <option value="">Select type</option>
+            <option>Trekking / expedition company</option>
+            <option>Educational / research program</option>
+            <option>INGO / NGO</option>
+            <option>Embassy / government</option>
+            <option>Travel insurance provider</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>How many active groups at peak?</label>
+          <select>
+            <option>1–3 groups</option>
+            <option>4–10 groups</option>
+            <option>11–30 groups</option>
+            <option>30+ groups</option>
+          </select>
+        </div>
+        <button type="submit" class="modal-submit">Create free account →</button>
+      </form>
+    </div>
+    <div class="modal-success" id="modal-success">
+      <div class="modal-success-icon">✦</div>
+      <h3>You're on the list.</h3>
+      <p>We'll send your access credentials within 24 hours. Welcome to Sentinel.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Live clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('live-time').textContent =
+    now.toUTCString().split(' ')[4] + ' UTC';
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// Fade-up observer
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) { e.preventDefault(); window.scrollTo({ top: t.offsetTop - 70, behavior: 'smooth' }); }
+  });
+});
+
+// Code tabs
+function switchTab(btn, lang) {
+  document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  ['curl','python','js'].forEach(l => {
+    const el = document.getElementById('code-' + l);
+    if (el) el.style.display = l === lang ? 'block' : 'none';
+  });
+}
+
+// Modal
+function openModal() {
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function handleModalSubmit(e) {
+  e.preventDefault();
+  document.getElementById('modal-form-wrap').style.display = 'none';
+  document.getElementById('modal-success').style.display = 'block';
+}
+
+// Chatbot
+const chatResponses = [
+  {
+    q: ['seismic', 'earthquake', 'quake'],
+    a: `Current seismic activity is within normal range for Nepal.`,
+    data: [
+      { k: 'Last event', v: 'M1.2 · 3h ago · Lamjung', c: 'green' },
+      { k: '24h max magnitude', v: 'M1.8', c: 'green' },
+      { k: 'Status', v: 'Normal activity', c: 'green' },
+      { k: 'Advisory', v: 'None active', c: 'green' },
+    ]
+  },
+  {
+    q: ['weather', 'forecast', 'snow', 'rain', 'wind'],
+    a: `Here's the current weather intelligence for the Langtang region:`,
+    data: [
+      { k: 'Today AM', v: 'Clear · -2°C · 3,430m', c: 'green' },
+      { k: 'Today PM', v: 'Snow risk · 3,800m+', c: 'amber' },
+      { k: 'Tomorrow', v: 'Partly cloudy · Stable', c: 'green' },
+      { k: 'Wind (summit)', v: '35 km/h · Moderate', c: 'amber' },
+    ]
+  },
+  {
+    q: ['route', 'trail', 'road', 'safe', 'langtang', 'annapurna', 'everest'],
+    a: `Route status for major trekking corridors as of now:`,
+    data: [
+      { k: 'Langtang Valley', v: 'CLEAR · Moderate risk', c: 'amber' },
+      { k: 'Annapurna Circuit', v: 'CLEAR · Low risk', c: 'green' },
+      { k: 'EBC approach', v: 'CLEAR · Low risk', c: 'green' },
+      { k: 'Mustang upper', v: 'HIGH WIND · Caution', c: 'amber' },
+    ]
+  },
+  {
+    q: ['risk', 'score', 'today', 'sindhupalchok', 'chitwan', 'pokhara'],
+    a: `Composite risk scores across active monitoring zones:`,
+    data: [
+      { k: 'Kathmandu Valley', v: '12 / 100 · Low', c: 'green' },
+      { k: 'Pokhara region', v: '18 / 100 · Low', c: 'green' },
+      { k: 'Langtang region', v: '34 / 100 · Moderate', c: 'amber' },
+      { k: 'Mustang / Upper', v: '48 / 100 · Moderate', c: 'amber' },
+    ]
+  }
+];
+
+const defaultResponse = {
+  a: `I can provide real-time data on seismic activity, weather, route conditions, and composite risk scores. Try asking about a specific location, route, or risk type.`,
+  data: [
+    { k: 'Data freshness', v: 'Updated < 15 min ago', c: 'green' },
+    { k: 'Coverage', v: '75 districts · all corridors', c: 'green' },
+  ]
+};
+
+function getResponse(input) {
+  const lower = input.toLowerCase();
+  for (const r of chatResponses) {
+    if (r.q.some(q => lower.includes(q))) return r;
+  }
+  return defaultResponse;
+}
+
+function addMessage(html, isUser) {
+  const body = document.getElementById('chat-body');
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg' + (isUser ? ' user' : '');
+  const avatar = isUser
+    ? '<div class="msg-avatar msg-user-avatar">U</div>'
+    : '<div class="msg-avatar msg-bot-avatar">S</div>';
+  msg.innerHTML = (isUser ? '' : avatar) + `<div class="msg-bubble msg-${isUser ? 'user' : 'bot'}">${html}</div>` + (isUser ? avatar : '');
+  body.appendChild(msg);
+  body.scrollTop = body.scrollHeight;
+}
+
+function addTyping() {
+  const body = document.getElementById('chat-body');
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg'; msg.id = 'typing';
+  msg.innerHTML = '<div class="msg-avatar msg-bot-avatar">S</div><div class="msg-bubble msg-bot"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>';
+  body.appendChild(msg);
+  body.scrollTop = body.scrollHeight;
+}
+
+function buildDataBlock(data) {
+  if (!data) return '';
+  const rows = data.map(d =>
+    `<div class="msg-data-row"><span class="d-key">${d.k}</span><span class="d-val-${d.c}">${d.v}</span></div>`
+  ).join('');
+  return `<div class="msg-data-block">${rows}</div>`;
+}
+
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const val = input.value.trim();
+  if (!val) return;
+  addMessage(val, true);
+  input.value = '';
+  addTyping();
+  setTimeout(() => {
+    const t = document.getElementById('typing');
+    if (t) t.remove();
+    const r = getResponse(val);
+    addMessage(r.a + buildDataBlock(r.data), false);
+  }, 1200);
+}
+
+document.getElementById('chat-send').addEventListener('click', sendChat);
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendChat();
+});
+
+// Animate risk score
+let riskDir = 1;
+setInterval(() => {
+  const el = document.getElementById('risk-score');
+  if (!el) return;
+  let val = parseInt(el.textContent);
+  val += riskDir * (Math.floor(Math.random() * 2));
+  if (val > 38) riskDir = -1;
+  if (val < 30) riskDir = 1;
+  el.textContent = val;
+}, 3000);
+</script>
+</body>
+</html>
